@@ -22,83 +22,30 @@ void tkerr(const char *fmt,...){
 // consume pentru atomii lexicali, primeste cod de atomi
 
 bool consume(int code){
+	printf("consume(%s)",getTokenNameByPosition(code));
 	if(iTk->code==code){
 		consumedTk=iTk;
 		iTk=iTk->next;
-		printf(" %s ",getTokenNameByPosition(iTk->code));
+		printf(" => consumed\n");
 		return true;
-		}
-	return false;
 	}
-
-// typeBase: TYPE_INT | TYPE_DOUBLE | TYPE_CHAR | STRUCT ID
-// atentie TOTUL SAU NIMIC
-// daca functia consuma toata regula, va returna true
-
-// bool exprOr(){ //are recursivitate stanga: exprOr: exprOr OR exprAnd | exprAnd
-//A:exprOr
-//alfa1: OR exprAnd
-//beta1: exprAnd
-//exprOr: exprAnd exprOrPrim
-//exprOrPrim: OR exprAnd exprOrPrim | epsilon
-//noul exprOR dupa transformarea asta:
-
-/*
-
-
-de folosit si pentru afisa atomul cu care am inceput regula
-const char *tkName(int code){
-	...
+		printf(" => found %s\n",getTokenNameByPosition(iTk->code));
+		return false;
 }
-
-bool exprOr(){
-	printf("#exprOr\n")
-	if(exprAnd()){
-		if(exprOrPrim){
-			return true;
-		}
-	}
-	return false;
-
-}
-bool exprOrPrim(){
-	
-	if(consume(OR)){
-		if(exprAnd()){
-			if(exprOrPrim()){
-				return true;
-			}
-		}
-	}
-	return true; //epsilon
-}
-*/
-// 	if(exprOr()){
-// 		if(consume(OR)){
-// 			if(exprAnd()){
-// 				return true;
-// 			}
-// 		}
-// 	}
-// 	if(exprAnd()){
-// 		return true;
-// 	}
-// 	return false;
-// }
 
 bool typeBase(){
-	printf("typeBase ");
+	printf("typeBase\n ");
 	Token *start=iTk;
 	if(consume(TYPE_INT)){
 		return true;
 		}
-	if(consume(TYPE_DOUBLE)){
+	else if(consume(TYPE_DOUBLE)){
 		return true;
 		}
-	if(consume(TYPE_CHAR)){
+	else if(consume(TYPE_CHAR)){
 		return true;
 		}
-	if(consume(STRUCT)){
+	else if(consume(STRUCT)){
 		if(consume(ID)){
 			return true;
 			}
@@ -136,11 +83,62 @@ bool varDef(){
 	return false;
 }
 
-bool fnDef(){
+bool expr(){
 	return false;
 }
 
+
+bool stm(){
+	Token* start= iTk;
+	if(stmCompound()){
+		return true;
+	}
+	if(consume(IF)){
+		if(consume(LPAR)){
+			if(expr()){
+				if(consume(RPAR)){
+					if(stm()){
+						if(consume(ELSE)){
+							if(stm()){}
+						}
+						return true;
+					}
+				}
+			}
+		}
+	}
+	if(consume(WHILE)){
+		if(consume(LPAR)){
+			if(expr()){
+				if(consume(RPAR)){
+					if(stm()){
+						return true;
+					}
+				}
+			}
+		}
+	}
+	iTk = start;
+	return false;
+}
+
+
+bool stmCompound(){
+	Token* start = iTk;
+	if(consume(LACC)){
+		while(varDef() || stm()){}
+		if(consume(RACC)){
+			return true;
+		}
+	}
+	iTk = start;
+	return false;
+}
+
+
+
 bool fnParam(){
+	printf("fnParam\n");
 	Token *start=iTk;
 	if(typeBase()){
 		if(consume(ID)){
@@ -148,6 +146,28 @@ bool fnParam(){
 			return true;
 		}
 	}
+	iTk=start;
+	return false;
+}
+
+bool fnDef(){
+	printf("fnDef\n");
+	Token *start= iTk;
+	if(typeBase() | consume(VOID)){
+		if(consume(ID)){
+			if(consume(LPAR)){
+				if(fnParam()){
+					while(consume(COMMA) && fnParam()){}
+				}
+				if(consume(RPAR)){
+					if(stmCompound()){
+						return true;
+					}
+				}
+			}
+		}
+	}
+
 	iTk=start;
 	return false;
 }
@@ -172,54 +192,6 @@ bool structDef(){
 	return false;
 }
 
-// bool stm(){
-
-// }
-
-// bool stmCompound(){
-// 	printf("StmCompound");
-
-// 	Token *start = iTk;
-
-// 	if(consume(LACC)){
-// 		for(;;){
-// 			if(varDef()){}
-// 			else if(stm()){}
-// 			else break;
-// 		}
-// 	}
-// 	if(consume(RACC)){
-// 		return true;
-// 	}
-// 	iTk = start;
-// 	return false;
-// }
-
-// bool exprAssign(){
-// 	printf("Expr Assign\n");
-
-// 	Token *start = iTk;
-
-// 	if(exprUnary()){
-// 		return true;
-// 	}
-
-// 	if(expr)
-
-// 	iTk = start;
-// 	return false;
-
-// }
-
-// bool exprEq(){
-	
-// }
-
-// bool expr(){
-// 	return exprAssign();
-// }
-
-
 // unit: ( structDef | fnDef | varDef )* END
 bool unit(){
 	for(;;){//sa putem verifica oricate reguli pentr "*", repetitie de la 1 la infinit
@@ -234,10 +206,8 @@ bool unit(){
 	return false;
 }
 
-
-
 void parse(Token *tokens){
 	iTk=tokens;
 	if(!unit())tkerr("syntax error");
-	printf("Hi");
+	printf("HiParse");
 }
