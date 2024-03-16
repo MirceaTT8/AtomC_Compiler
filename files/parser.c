@@ -56,7 +56,7 @@ bool typeBase(){
 
 
 bool arrayDecl(){
-	printf("arrayDecl ");
+	printf("arrayDecl\n");
 	Token* start = iTk;
 	if(consume(LBRACKET)){
 		if(consume(INT)){}
@@ -69,7 +69,7 @@ bool arrayDecl(){
 }
 
 bool varDef(){
-	printf("varDef ");
+	printf("varDef\n ");
 	Token* start = iTk;
 	if(typeBase()){
 		if(consume(ID)){
@@ -83,10 +83,315 @@ bool varDef(){
 	return false;
 }
 
+ //are recursivitate stanga: exprOr: exprOr OR exprAnd | exprAnd
+//A:exprOr
+//alfa1: OR exprAnd
+//beta1: exprAnd
+//noul exprOR dupa transformarea asta:
+
+
+
+
+// de folosit si pentru afisa atomul cu care am inceput regula
+// const char *tkName(int code){
+// 	...
+// }
+
 bool expr(){
+	Token *start = iTk;
+	if(exprAssign()){
+		return true;
+	}
+	iTk = start;
 	return false;
 }
 
+bool exprAssign(){
+	Token *start = iTk;
+	if(exprUnary()){
+		if(consume(ASSIGN)){
+			if(exprAssign()){
+				return true;
+			}
+			if(exprOr()){
+				return true;
+			}
+		}
+	}
+	iTk = start;
+	return false;
+}
+
+//exprOr: exprAnd exprOrPrim
+//exprOrPrim: OR exprAnd exprOrPrim | epsilon
+
+bool exprOr(){
+	Token* start = iTk;
+	if(exprAnd()){
+		if(exprOrPrim()){
+			return true;
+		}
+	}
+	iTk = start;
+	return false;
+
+}
+bool exprOrPrim() {
+    if (consume(OR)) { // Prima alternativă: OR exprAnd exprOrPrim
+        if (exprAnd()) {
+            if (exprOrPrim()) {
+                return true;
+            }
+        }
+    }
+    return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
+}
+
+// bool exprOr(){
+// 	if(exprOr()){
+// 		if(consume(OR)){
+// 			if(exprAnd()){
+// 				return true;
+// 			}
+// 		}
+// 	}
+// 	if(exprAnd()){
+// 		return true;
+// 	}
+// 	return false;
+// }
+
+// exprAnd: exprAnd AND exprEq | exprEq
+// exprAnd: exprEq exprAndPrim
+// exprAndPrime: AND exprEq exprAndPrim | ε
+
+bool exprAnd() {
+    Token* start = iTk;
+	if(exprEq()){
+		if(exprAndPrim()){
+			return true;
+		}
+	}
+	iTk = start;
+	return false;
+}
+
+bool exprAndPrim() {
+    if (consume(AND)) { // Prima alternativă: OR exprAnd exprOrPrim
+        if (exprEq()) {
+            if (exprAndPrim()) {
+                return true;
+            }
+        }
+    }
+    return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
+}
+
+// exprEq: exprEq ( EQUAL | NOTEQ ) exprRel | exprRel
+// exprEq: exprRel exprEqPrim
+// exprEqPrim: ( EQUAL | NOTEQ ) exprRel exprEqPrim | ε
+
+bool exprEq() {
+    Token* start = iTk;
+	if(exprRel()){
+		if(exprEqPrim()){
+			return true;
+		}
+	}
+	iTk = start;
+	return false;
+}
+
+bool exprEqPrim() {
+    if (consume(EQUAL) || consume(NOTEQ)) { // Prima alternativă: OR exprAnd exprOrPrim
+        if (exprRel()) {
+            if (exprEqPrim()) {
+                return true;
+            }
+        }
+    }
+    return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
+}
+
+// exprRel: exprRel ( LESS | LESSEQ | GREATER | GREATEREQ ) exprAdd | exprAdd
+// exprRel: exprAdd exprRelPrim
+// exprRelPrim: ( LESS | LESSEQ | GREATER | GREATEREQ ) exprAdd exprRelPrim | ε
+
+bool exprRel() {
+    Token* start = iTk;
+	if(exprAdd()){
+		if(exprRelPrim()){
+			return true;
+		}
+	}
+	iTk = start;
+	return false;
+}
+
+bool exprRelPrim() {
+    if (consume(LESS) || consume(LESSEQ) || consume(GREATER) || consume(GREATEREQ)) { // Prima alternativă: OR exprAnd exprOrPrim
+        if (exprAdd()) {
+            if (exprRelPrim()) {
+                return true;
+            }
+        }
+    }
+    return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
+}
+
+// exprAdd: exprAdd ( ADD | SUB ) exprMul | exprMul
+// exprAdd: exprMul exprAddPrim
+// exprAddPrim: ( ADD | SUB ) exprMul exprAddPrim | ε
+
+bool exprAdd() {
+    Token* start = iTk;
+	if(exprMul()){
+		if(exprAddPrim()){
+			return true;
+		}
+	}
+	iTk = start;
+	return false;
+}
+
+bool exprAddPrim() {
+    if (consume(ADD) || consume(SUB)) { // Prima alternativă: OR exprAnd exprOrPrim
+        if (exprMul()) {
+            if (exprAddPrim()) {
+                return true;
+            }
+        }
+    }
+    return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
+}
+
+// exprMul: exprMul ( MUL | DIV ) exprCast | exprCast
+// exprMul: exprCast exprMulPrime
+// exprMulPrime: ( MUL | DIV ) exprCast exprMulPrime | ε
+
+bool exprMul() {
+    Token* start = iTk;
+	if(exprCast()){
+		if(exprMulPrim()){
+			return true;
+		}
+	}
+	iTk = start;
+	return false;
+}
+
+bool exprMulPrim() {
+    if (consume(MUL) || consume(DIV)) { // Prima alternativă: OR exprAnd exprOrPrim
+        if (exprCast()) {
+            if (exprMulPrim()) {
+                return true;
+            }
+        }
+    }
+    return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
+}
+
+bool exprCast(){
+	Token* start = iTk;
+	if(consume(LPAR)){
+		if(typeBase()){
+			if(arrayDecl()){}
+			if(consume(RPAR)){
+				if(exprCast()){
+					return true;
+				}
+				if(exprUnary()){
+					return true;
+				}
+			}
+		}
+
+	}
+	iTk = start;
+	return false;
+}
+
+bool exprUnary(){
+	Token* start = iTk;
+	if(consume(SUB)|| consume(ADD)){
+		if(exprUnary()){
+			return true;
+		}
+		if(exprPostfix()){
+			return true;
+		}
+	}
+	iTk = start;
+	return false;
+}
+
+// exprPostfix: exprPostfix LBRACKET expr RBRACKET
+//            | exprPostfix DOT ID
+//            | exprPrimary
+// exprPostfix: exprPrimary exprPostfixPrime
+// exprPostfixPrime: ( LBRACKET expr RBRACKET | DOT ID ) exprPostfixPrime | ε
+
+bool exprPostfix() {
+    Token* start = iTk;
+	if(exprPrimary()){
+		if(exprPostfixPrim()){
+			return true;
+		}
+	}
+	iTk = start;
+	return false;
+}
+
+bool exprPostfixPrim(){
+	Token* start = iTk;
+	if(consume(LBRACKET)){
+		if(expr()){
+			if(consume(RBRACKET)){
+				if(exprPostfixPrim())
+				{
+					return true;
+				}
+			}
+		}
+	}
+	if(consume(DOT)){
+		if(consume(ID)){
+			if(exprPostfixPrim()){
+				return true;
+			}
+		}
+	}
+	iTk = start;
+	return false;
+}
+
+// exprPrimary: ID ( LPAR ( expr ( COMMA expr )* )? RPAR )?
+//            | INT
+//            | DOUBLE
+//            | CHAR
+//            | STRING
+//            | LPAR expr RPAR
+
+bool exprPrimary(){
+	Token* start = iTk;
+	if(consume(ID)){
+		if(consume(LPAR)){
+			if(expr()){
+				while(consume(COMMA)){
+					if(!expr()){
+						return false;
+					}
+				}
+			}
+			if(consume(RPAR)){
+				return true;
+			}
+		}
+		return true;
+	}
+	iTk = start;
+	return false;
+}
 
 bool stm(){
 	Token* start= iTk;
@@ -117,6 +422,16 @@ bool stm(){
 				}
 			}
 		}
+	}
+	if(consume(RETURN)){
+		if(expr()){}
+		if(consume(SEMICOLON)){
+			return true;
+		}
+	}
+	if(expr())
+	if(consume(SEMICOLON)){
+		return true;
 	}
 	iTk = start;
 	return false;
@@ -153,7 +468,7 @@ bool fnParam(){
 bool fnDef(){
 	printf("fnDef\n");
 	Token *start= iTk;
-	if(typeBase() | consume(VOID)){
+	if(typeBase() || consume(VOID)){
 		if(consume(ID)){
 			if(consume(LPAR)){
 				if(fnParam()){

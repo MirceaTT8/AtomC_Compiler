@@ -10,7 +10,7 @@ int main(){
     puts(inbuf);
     Token *tokens=tokenize(inbuf);
     parse(tokens);
-    //showTokens(tokens);
+    // showTokens(tokens);
     printf("\nByeMain");
     free(inbuf);
     free(tokens);

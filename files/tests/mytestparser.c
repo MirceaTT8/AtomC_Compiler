@@ -1,5 +1,4 @@
-struct Pt{
-	int x;
-	int y;
-	};
-struct Pt points[10];
+
+	if(a>b)return a;
+		else return b;
+	
