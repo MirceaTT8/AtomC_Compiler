@@ -97,27 +97,35 @@ bool varDef(){
 // 	...
 // }
 
+// expr: exprAssign
+
 bool expr(){
+	printf("expr\n");
 	Token *start = iTk;
 	if(exprAssign()){
 		return true;
 	}
+	printf("exprfalse\n");
 	iTk = start;
 	return false;
 }
 
+// exprAssign: exprUnary ASSIGN exprAssign | exprOr
+
 bool exprAssign(){
+	printf("exprAssign\n");
 	Token *start = iTk;
 	if(exprUnary()){
 		if(consume(ASSIGN)){
 			if(exprAssign()){
 				return true;
 			}
-			if(exprOr()){
-				return true;
-			}
 		}
 	}
+	if(exprOr()){
+		return true;
+	}
+	printf("exprAssignfalse\n");
 	iTk = start;
 	return false;
 }
@@ -126,6 +134,7 @@ bool exprAssign(){
 //exprOrPrim: OR exprAnd exprOrPrim | epsilon
 
 bool exprOr(){
+	printf("exprOr\n");
 	Token* start = iTk;
 	if(exprAnd()){
 		if(exprOrPrim()){
@@ -133,6 +142,7 @@ bool exprOr(){
 		}
 	}
 	iTk = start;
+	printf("exprOrfalse\n");
 	return false;
 
 }
@@ -147,25 +157,12 @@ bool exprOrPrim() {
     return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
 }
 
-// bool exprOr(){
-// 	if(exprOr()){
-// 		if(consume(OR)){
-// 			if(exprAnd()){
-// 				return true;
-// 			}
-// 		}
-// 	}
-// 	if(exprAnd()){
-// 		return true;
-// 	}
-// 	return false;
-// }
-
 // exprAnd: exprAnd AND exprEq | exprEq
 // exprAnd: exprEq exprAndPrim
 // exprAndPrime: AND exprEq exprAndPrim | ε
 
 bool exprAnd() {
+	printf("exprAnd\n");
     Token* start = iTk;
 	if(exprEq()){
 		if(exprAndPrim()){
@@ -173,6 +170,7 @@ bool exprAnd() {
 		}
 	}
 	iTk = start;
+	printf("exprAndfalse\n");
 	return false;
 }
 
@@ -192,12 +190,14 @@ bool exprAndPrim() {
 // exprEqPrim: ( EQUAL | NOTEQ ) exprRel exprEqPrim | ε
 
 bool exprEq() {
+	printf("exprEq\n");
     Token* start = iTk;
 	if(exprRel()){
 		if(exprEqPrim()){
 			return true;
 		}
 	}
+	printf("exprEqfalse\n");
 	iTk = start;
 	return false;
 }
@@ -218,12 +218,14 @@ bool exprEqPrim() {
 // exprRelPrim: ( LESS | LESSEQ | GREATER | GREATEREQ ) exprAdd exprRelPrim | ε
 
 bool exprRel() {
+	printf("exprRel\n");
     Token* start = iTk;
 	if(exprAdd()){
 		if(exprRelPrim()){
 			return true;
 		}
 	}
+	printf("exprRelfalse\n");
 	iTk = start;
 	return false;
 }
@@ -244,12 +246,14 @@ bool exprRelPrim() {
 // exprAddPrim: ( ADD | SUB ) exprMul exprAddPrim | ε
 
 bool exprAdd() {
+	printf("exprAdd\n");
     Token* start = iTk;
 	if(exprMul()){
 		if(exprAddPrim()){
 			return true;
 		}
 	}
+	printf("exprAddfalse\n");
 	iTk = start;
 	return false;
 }
@@ -270,12 +274,14 @@ bool exprAddPrim() {
 // exprMulPrime: ( MUL | DIV ) exprCast exprMulPrime | ε
 
 bool exprMul() {
+	printf("exprMul\n");
     Token* start = iTk;
 	if(exprCast()){
 		if(exprMulPrim()){
 			return true;
 		}
 	}
+	printf("exprMulfalse\n");
 	iTk = start;
 	return false;
 }
@@ -292,6 +298,7 @@ bool exprMulPrim() {
 }
 
 bool exprCast(){
+	printf("exprCast\n");
 	Token* start = iTk;
 	if(consume(LPAR)){
 		if(typeBase()){
@@ -300,27 +307,30 @@ bool exprCast(){
 				if(exprCast()){
 					return true;
 				}
-				if(exprUnary()){
-					return true;
-				}
 			}
 		}
 
 	}
+	if(exprUnary()){
+		return true;
+	}
+	printf("exprCastfalse\n");
 	iTk = start;
 	return false;
 }
 
 bool exprUnary(){
+	printf("exprUnary\n");
 	Token* start = iTk;
 	if(consume(SUB)|| consume(ADD)){
 		if(exprUnary()){
 			return true;
 		}
-		if(exprPostfix()){
-			return true;
-		}
 	}
+	if(exprPostfix()){
+		return true;
+	}
+	printf("exprUnaryfalse\n");
 	iTk = start;
 	return false;
 }
@@ -332,18 +342,19 @@ bool exprUnary(){
 // exprPostfixPrime: ( LBRACKET expr RBRACKET | DOT ID ) exprPostfixPrime | ε
 
 bool exprPostfix() {
+	printf("exprPostfix\n");
     Token* start = iTk;
 	if(exprPrimary()){
 		if(exprPostfixPrim()){
 			return true;
 		}
 	}
+	printf("exprPostfixfalse\n");
 	iTk = start;
 	return false;
 }
 
 bool exprPostfixPrim(){
-	Token* start = iTk;
 	if(consume(LBRACKET)){
 		if(expr()){
 			if(consume(RBRACKET)){
@@ -361,8 +372,7 @@ bool exprPostfixPrim(){
 			}
 		}
 	}
-	iTk = start;
-	return false;
+	return true;
 }
 
 // exprPrimary: ID ( LPAR ( expr ( COMMA expr )* )? RPAR )?
@@ -373,13 +383,14 @@ bool exprPostfixPrim(){
 //            | LPAR expr RPAR
 
 bool exprPrimary(){
+	printf("exprPrimary\n");
 	Token* start = iTk;
 	if(consume(ID)){
 		if(consume(LPAR)){
 			if(expr()){
 				while(consume(COMMA)){
-					if(!expr()){
-						return false;
+					if(expr()){
+						return true;
 					}
 				}
 			}
@@ -389,11 +400,30 @@ bool exprPrimary(){
 		}
 		return true;
 	}
+	else if(consume(DOUBLE)){
+		return true;
+	}
+	else if(consume(CHAR)){
+		return true;
+	}
+	else if(consume(INT)){
+		return STRING;
+	}
+	else if(consume(LPAR)){
+		if(expr()){
+			if(consume(RPAR)){
+				return true;
+			}
+		}
+		iTk = start;
+	}
+	printf("exprPrimaryfalse\n");
 	iTk = start;
 	return false;
 }
 
 bool stm(){
+	printf("Stm\n");
 	Token* start= iTk;
 	if(stmCompound()){
 		return true;
@@ -439,6 +469,7 @@ bool stm(){
 
 
 bool stmCompound(){
+	printf("StmCompound\n");
 	Token* start = iTk;
 	if(consume(LACC)){
 		while(varDef() || stm()){}

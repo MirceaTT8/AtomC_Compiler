@@ -9,8 +9,8 @@ int main(){
     char* inbuf = loadFile("tests/mytestparser.c");
     puts(inbuf);
     Token *tokens=tokenize(inbuf);
+    showTokens(tokens);
     parse(tokens);
-    // showTokens(tokens);
     printf("\nByeMain");
     free(inbuf);
     free(tokens);

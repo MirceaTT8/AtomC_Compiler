@@ -162,14 +162,18 @@ Token *tokenize(const char *pch){
 					addTk(OR);
 					pch+=2;
 				}
-				pch++;
+				else{
+					pch++;
+				}
 				break;
 			case '!':
 				if(pch[1]=='='){
 					addTk(NOTEQ);
 					pch+=2;
 					}
-					pch++;
+					else{
+						pch++;
+					}
 				break;
 			default: //INT poate sa inceapa cu digiti etc de astea, nu au nevoie de case uri separate
 				if(isalpha(*pch)||*pch=='_'){
