@@ -1,87 +1,30 @@
-unit
-  structDef
-    STRUCT, ID: Pt, LACC
-      varDef
-        TYPE_INT, ID: x, SEMICOLON
-      varDef
-        TYPE_INT, ID: y, SEMICOLON
-    RACC, SEMICOLON
-  varDef
-    STRUCT ID: Pt, arrayDecl: [10], ID: points, SEMICOLON
-  fnDef
-    TYPE_DOUBLE, ID: max, LPAR
-      fnParam
-        TYPE_DOUBLE, ID: a
-      fnParam
-        TYPE_DOUBLE, ID: b
-    RPAR
-    stmCompound
-      LACC
-        IF, LPAR
-          expr
-            exprRel
-              exprAdd
-                exprMul
-                  exprPrimary: ID: a
-              GREATER
-              exprAdd
-                exprMul
-                  exprPrimary: ID: b
-        RPAR
-        stm
-          RETURN, exprPrimary: ID: a, SEMICOLON
-        ELSE
-          RETURN, exprPrimary: ID: b, SEMICOLON
-      RACC
-  fnDef
-    TYPE_INT, ID: len, LPAR
-      fnParam
-        TYPE_CHAR, arrayDecl: [], ID: s
-    RPAR
-    stmCompound
-      LACC
-        varDef
-          TYPE_INT, ID: i, SEMICOLON
-        stm
-          exprAssign
-            exprPrimary: ID: i
-            ASSIGN
-            exprPrimary: INT: 0
-          SEMICOLON
-        WHILE, LPAR
-          expr
-            exprPrimary: ID: s, LBRACKET, exprPrimary: ID: i, RBRACKET
-        RPAR, stm
-          exprAssign
-            exprPrimary: ID: i
-            ASSIGN
-            exprAdd
-              exprPrimary: ID: i
-              ADD
-              exprPrimary: INT: 1
-          SEMICOLON
-        RETURN, exprPrimary: ID: i, SEMICOLON
-      RACC
-  fnDef
-    VOID, ID: main, LPAR, RPAR
-    stmCompound
-      LACC
-        varDef
-          TYPE_INT, ID: i, SEMICOLON
-        WHILE, LPAR
-          exprRel
-            exprPrimary: ID: i
-            NOTEQ
-            exprPrimary: INT: 0
-        RPAR, stm
-          expr?, SEMICOLON
-          exprAssign
-            exprPrimary: ID: i
-            ASSIGN
-            exprMul
-              exprPrimary: ID: i
-              DIV
-              exprPrimary: INT: 2
-          SEMICOLON
-      RACC
-END
+1 TYPE_DOUBLE
+1 ID:max
+1 LPAR
+1 TYPE_DOUBLE
+1 ID:a
+1 COMMA
+1 TYPE_DOUBLE
+1 ID:b
+1 RPAR
+1 LACC
+2 IF
+2 LPAR
+2 ID:a
+2 GREATER
+2 ID:b
+2 RPAR
+2 RETURN
+2 ID:a
+2 SEMICOLON
+3 ELSE
+3 RETURN
+3 ID:b
+3 SEMICOLON
+4 RACC
+4 END
+
+stmCompound -> consume(LACC)
+varDef
+  typeBase
+  

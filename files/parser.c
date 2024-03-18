@@ -72,6 +72,7 @@ bool varDef(){
 	printf("varDef\n ");
 	Token* start = iTk;
 	if(typeBase()){
+		printf("typeBase->varDef\n ");
 		if(consume(ID)){
 			if(arrayDecl()){}
 			if(consume(SEMICOLON)){
@@ -103,6 +104,7 @@ bool expr(){
 	printf("expr\n");
 	Token *start = iTk;
 	if(exprAssign()){
+		printf("exprAssign->expr\n");
 		return true;
 	}
 	printf("exprfalse\n");
@@ -116,13 +118,16 @@ bool exprAssign(){
 	printf("exprAssign\n");
 	Token *start = iTk;
 	if(exprUnary()){
+		printf("exprUnary->exprAssign\n");
 		if(consume(ASSIGN)){
 			if(exprAssign()){
 				return true;
 			}
 		}
+		iTk=start;
 	}
 	if(exprOr()){
+		printf("exprOr->exprAssign\n");
 		return true;
 	}
 	printf("exprAssignfalse\n");
@@ -137,6 +142,7 @@ bool exprOr(){
 	printf("exprOr\n");
 	Token* start = iTk;
 	if(exprAnd()){
+		printf("exprAnd->exprOr\n");
 		if(exprOrPrim()){
 			return true;
 		}
@@ -165,6 +171,7 @@ bool exprAnd() {
 	printf("exprAnd\n");
     Token* start = iTk;
 	if(exprEq()){
+			printf("exprEq->exprAnd\n");
 		if(exprAndPrim()){
 			return true;
 		}
@@ -193,6 +200,7 @@ bool exprEq() {
 	printf("exprEq\n");
     Token* start = iTk;
 	if(exprRel()){
+		printf("exprRel->exprEq\n");
 		if(exprEqPrim()){
 			return true;
 		}
@@ -221,6 +229,7 @@ bool exprRel() {
 	printf("exprRel\n");
     Token* start = iTk;
 	if(exprAdd()){
+		printf("exprAdd->exprRel\n");
 		if(exprRelPrim()){
 			return true;
 		}
@@ -249,6 +258,7 @@ bool exprAdd() {
 	printf("exprAdd\n");
     Token* start = iTk;
 	if(exprMul()){
+		printf("exprMul->exprAdd\n");
 		if(exprAddPrim()){
 			return true;
 		}
@@ -277,6 +287,7 @@ bool exprMul() {
 	printf("exprMul\n");
     Token* start = iTk;
 	if(exprCast()){
+		printf("exprCast->exprMul\n");	
 		if(exprMulPrim()){
 			return true;
 		}
@@ -312,6 +323,7 @@ bool exprCast(){
 
 	}
 	if(exprUnary()){
+		printf("exprUnary->exprCast\n");	
 		return true;
 	}
 	printf("exprCastfalse\n");
@@ -328,6 +340,7 @@ bool exprUnary(){
 		}
 	}
 	if(exprPostfix()){
+		printf("exprPostfix->exprUnary\n");
 		return true;
 	}
 	printf("exprUnaryfalse\n");
@@ -345,6 +358,8 @@ bool exprPostfix() {
 	printf("exprPostfix\n");
     Token* start = iTk;
 	if(exprPrimary()){
+			printf("exprPrimary->exprPostfix\n");
+
 		if(exprPostfixPrim()){
 			return true;
 		}
@@ -355,6 +370,7 @@ bool exprPostfix() {
 }
 
 bool exprPostfixPrim(){
+	Token* start = iTk;
 	if(consume(LBRACKET)){
 		if(expr()){
 			if(consume(RBRACKET)){
@@ -364,6 +380,7 @@ bool exprPostfixPrim(){
 				}
 			}
 		}
+		iTk=start;
 	}
 	if(consume(DOT)){
 		if(consume(ID)){
@@ -371,6 +388,7 @@ bool exprPostfixPrim(){
 				return true;
 			}
 		}
+		iTk=start;
 	}
 	return true;
 }
@@ -388,14 +406,15 @@ bool exprPrimary(){
 	if(consume(ID)){
 		if(consume(LPAR)){
 			if(expr()){
+				printf("expr->exprPrimary");
 				while(consume(COMMA)){
-					if(expr()){
-						return true;
+					if(!expr()){
+						return false;
 					}
 				}
 			}
-			if(consume(RPAR)){
-				return true;
+			if(!consume(RPAR)){
+				return false;
 			}
 		}
 		return true;
@@ -406,8 +425,11 @@ bool exprPrimary(){
 	else if(consume(CHAR)){
 		return true;
 	}
+	else if(consume(STRING)){
+		return true;
+	}
 	else if(consume(INT)){
-		return STRING;
+		return true;
 	}
 	else if(consume(LPAR)){
 		if(expr()){
@@ -426,6 +448,7 @@ bool stm(){
 	printf("Stm\n");
 	Token* start= iTk;
 	if(stmCompound()){
+		printf("stmCompound->stm\n ");
 		return true;
 	}
 	if(consume(IF)){
@@ -441,6 +464,7 @@ bool stm(){
 				}
 			}
 		}
+		iTk=start;
 	}
 	if(consume(WHILE)){
 		if(consume(LPAR)){
@@ -452,12 +476,14 @@ bool stm(){
 				}
 			}
 		}
+		iTk=start;
 	}
 	if(consume(RETURN)){
 		if(expr()){}
 		if(consume(SEMICOLON)){
 			return true;
 		}
+		iTk=start;
 	}
 	if(expr())
 	if(consume(SEMICOLON)){
@@ -472,7 +498,9 @@ bool stmCompound(){
 	printf("StmCompound\n");
 	Token* start = iTk;
 	if(consume(LACC)){
-		while(varDef() || stm()){}
+		while(varDef() || stm()){
+			printf("varDef()/stm()->stmCompound\n ");
+		}
 		if(consume(RACC)){
 			return true;
 		}
@@ -487,6 +515,7 @@ bool fnParam(){
 	printf("fnParam\n");
 	Token *start=iTk;
 	if(typeBase()){
+		printf("typeBase->fnParam\n");
 		if(consume(ID)){
 			if(arrayDecl()){}
 			return true;
@@ -500,13 +529,17 @@ bool fnDef(){
 	printf("fnDef\n");
 	Token *start= iTk;
 	if(typeBase() || consume(VOID)){
+		printf("typeBase->fnDef\n");
 		if(consume(ID)){
 			if(consume(LPAR)){
 				if(fnParam()){
-					while(consume(COMMA) && fnParam()){}
+					while(consume(COMMA) && fnParam()){
+						printf("fnParam->fnDef\n");
+					}
 				}
 				if(consume(RPAR)){
 					if(stmCompound()){
+						printf("stmCompound->fnDef\n");
 						return true;
 					}
 				}
@@ -524,7 +557,9 @@ bool structDef(){
 	if(consume(STRUCT)){
 		if(consume(ID)){
 			if(consume(LACC)){
-				while(varDef()){}
+				while(varDef()){
+					printf("varDef->structDef\n");
+				}
 				if(consume(RACC)){
 					if(consume(SEMICOLON))
 					{
