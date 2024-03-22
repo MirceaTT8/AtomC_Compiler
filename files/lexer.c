@@ -172,6 +172,7 @@ Token *tokenize(const char *pch){
 					pch+=2;
 					}
 					else{
+						addTk(NOT);
 						pch++;
 					}
 				break;
