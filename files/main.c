@@ -6,7 +6,7 @@
 #include "parser.h"
 
 int main(){
-    char* inbuf = loadFile("tests/testparser.c");
+    char* inbuf = loadFile("tests/mytestparser.c");
     puts(inbuf);
     Token *tokens=tokenize(inbuf);
     showTokens(tokens);

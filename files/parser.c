@@ -48,7 +48,7 @@ bool typeBase(){
 	else if(consume(STRUCT)){
 		if(consume(ID)){
 			return true;
-			}else tkerr("lipseste numele structurii");
+			}else tkerr("Lipseste id-ul struct-ului");
 		}
 	iTk=start; // refacere pozitie initiala
 	return false;
@@ -62,7 +62,7 @@ bool arrayDecl(){
 		if(consume(INT)){}
 		if(consume(RBRACKET)){
 			return true;
-		}else tkerr("Nu exista acolada deschisa fara acolada inchisa\n");
+		}else tkerr("lipseste ]");
 	}
 	iTk = start;
 	return false;
@@ -77,8 +77,8 @@ bool varDef(){
 			if(arrayDecl()){}
 			if(consume(SEMICOLON)){
 				return true;
-			}
-		}
+			}else tkerr("lipseste ;");
+		}else tkerr("id missing in a type statement");
 	}
 	iTk = start;
 	return false;
@@ -122,8 +122,9 @@ bool exprAssign(){
 		if(consume(ASSIGN)){
 			if(exprAssign()){
 				return true;
-			}
-		}else tkerr("no expression after assign");
+			}else tkerr("no expression after assign");
+		}
+		iTk=start;
 	}
 	if(exprOr()){
 		printf("exprOr->exprAssign\n");
@@ -157,7 +158,7 @@ bool exprOrPrim() {
             if (exprOrPrim()) {
                 return true;
             }
-        }else tkerr("No expression after ||");
+        }
     }
     return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
 }
@@ -170,7 +171,7 @@ bool exprAnd() {
 	printf("exprAnd\n");
     Token* start = iTk;
 	if(exprEq()){
-			printf("exprEq->exprAnd\n");
+		printf("exprEq->exprAnd\n");
 		if(exprAndPrim()){
 			return true;
 		}
@@ -215,7 +216,7 @@ bool exprEqPrim() {
             if (exprEqPrim()) {
                 return true;
             }
-        }tkerr("No expression after == or !=");
+        }tkerr("No expression after equality operator");
     }
     return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
 }
@@ -243,8 +244,8 @@ bool exprRelPrim() {
         if (exprAdd()) {
             if (exprRelPrim()) {
                 return true;
-            }tkerr("No expression after < <= > or >=");
-        }
+            }
+        }tkerr("No expression after relation operator");
     }
     return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
 }
@@ -273,7 +274,7 @@ bool exprAddPrim() {
             if (exprAddPrim()) {
                 return true;
             }
-        }tkerr("No expression after + or -");
+        }tkerr("No expression after adder operator");
     }
     return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
 }
@@ -302,7 +303,7 @@ bool exprMulPrim() {
             if (exprMulPrim()) {
                 return true;
             }
-        }tkerr("No expression after * or \\");
+        }tkerr("No expression after multiplier operator");
     }
     return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
 }
@@ -317,8 +318,8 @@ bool exprCast(){
 				if(exprCast()){
 					return true;
 				}
-			}tkerr("Missing )");
-		}tkerr("No expression after (");
+			}
+		}
 	}
 	if(exprUnary()){
 		printf("exprUnary->exprCast\n");	
@@ -376,8 +377,7 @@ bool exprPostfixPrim(){
 				{
 					return true;
 				}
-			}
-			else tkerr("missing }");
+			}else tkerr("lipseste ]");
 		}
 		iTk=start;
 	}
@@ -407,12 +407,14 @@ bool exprPrimary(){
 			if(expr()){
 				printf("expr->exprPrimary");
 				while(consume(COMMA)){
-					if(expr()){}else tkerr("No expression after comma");
+					if(!expr()){
+						return false;
+					}
 				}
 			}
-			if(consume(RPAR)){
-				return true;
-			}else tkerr(") missing");
+			if(!consume(RPAR)){
+				return false;
+			}
 		}
 		return true;
 	}
@@ -454,16 +456,16 @@ bool stm(){
 				if(consume(RPAR)){
 					if(stm()){
 						if(consume(ELSE)){
-							if(stm()){}
+							if(stm()){}else tkerr("else statement mssing");
 						}
 						return true;
-					}
-				}else tkerr("Lipseste ) dupa conditia if-ului");
-			}else tkerr("Conditie if invalida");
-		}else tkerr("lipseste ( dupa if");
+					}else tkerr("if statement mssing");
+				}else tkerr("Missing )");
+			}else tkerr("Missing if expression");
+		}else tkerr("Missing ( after if");
 		iTk=start;
 	}
-	if(consume(WHILE)){
+	else if(consume(WHILE)){
 		if(consume(LPAR)){
 			if(expr()){
 				if(consume(RPAR)){
@@ -475,14 +477,14 @@ bool stm(){
 		}
 		iTk=start;
 	}
-	if(consume(RETURN)){
+	else if(consume(RETURN)){
 		if(expr()){}
 		if(consume(SEMICOLON)){
 			return true;
-		}
+		}else tkerr("missing ; at return statement");
 		iTk=start;
 	}
-	if(expr())
+	else if(expr())
 	if(consume(SEMICOLON)){
 		return true;
 	}
@@ -490,22 +492,25 @@ bool stm(){
 	return false;
 }
 
-
 bool stmCompound(){
 	printf("StmCompound\n");
 	Token* start = iTk;
 	if(consume(LACC)){
-		while(varDef() || stm()){
-			printf("varDef()/stm()->stmCompound\n ");
+		// while(varDef() || stm()){
+		// 	printf("varDef()/stm()->stmCompound\n ");
+		// }
+		for(;;){
+			if(varDef()){ printf("varDef() -> stmCompound");}
+			else if(stm()){ printf("stm() -> stmCompound"); }
+			else break;
 		}
 		if(consume(RACC)){
 			return true;
-		}
+		}else tkerr("Missing } for a statement");
 	}
 	iTk = start;
 	return false;
 }
-
 
 
 bool fnParam(){
@@ -516,7 +521,7 @@ bool fnParam(){
 		if(consume(ID)){
 			if(arrayDecl()){}
 			return true;
-		}
+		}else tkerr("Missing id after typebase");
 	}
 	iTk=start;
 	return false;
@@ -530,18 +535,21 @@ bool fnDef(){
 		if(consume(ID)){
 			if(consume(LPAR)){
 				if(fnParam()){
-					while(consume(COMMA) && fnParam()){
-						printf("fnParam->fnDef\n");
+					// while(consume(COMMA) && fnParam()){
+					// 	printf("fnParam->fnDef\n");
+					// }
+					while(consume(COMMA)){
+						if(fnParam()){}
+						else tkerr("Expected type specifier in function after ,");
 					}
 				}
 				if(consume(RPAR)){
 					if(stmCompound()){
 						printf("stmCompound->fnDef\n");
 						return true;
-					}else tkerr("lipseste corpul instructiunii");
-				}else tkerr("lipseste numele structurii");
-				
-			}
+					}else tkerr("Missing body function");
+				}else tkerr("Missing ) in function");
+			}else tkerr("Missing arguments of function");
 		}
 	}
 
@@ -562,10 +570,10 @@ bool structDef(){
 					if(consume(SEMICOLON))
 					{
 						return true;
-					}
-				}else tkerr("Nu exista } la cea deschisa");
+					}else tkerr("; expected at struct defining");
+				}else tkerr("Missing } when defining struct");
 			}
-		}else tkerr("Lipseste id-ul la struct");
+		}else tkerr("Lipseste id-ul struct-ului");
 	}
 	iTk = start;
 	return false;
@@ -588,7 +596,5 @@ bool unit(){
 void parse(Token *tokens){
 	iTk=tokens;
 	if(!unit())tkerr("syntax error");
-	//mesajul de eroare trebuie sa fie specific
-	//2 formulari: if a<b) if (<b)
 	printf("HiParse");
 }
