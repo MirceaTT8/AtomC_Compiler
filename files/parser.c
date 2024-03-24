@@ -78,7 +78,7 @@ bool varDef(){
 			if(consume(SEMICOLON)){
 				return true;
 			}else tkerr("lipseste ;");
-		}else tkerr("id missing in a type statement");
+		}else tkerr("id missing after a tyoeBase statement");
 	}
 	iTk = start;
 	return false;
@@ -122,7 +122,7 @@ bool exprAssign(){
 		if(consume(ASSIGN)){
 			if(exprAssign()){
 				return true;
-			}else tkerr("no expression after assign");
+			}else tkerr("no expression after assign operator");
 		}
 		iTk=start;
 	}
@@ -158,7 +158,7 @@ bool exprOrPrim() {
             if (exprOrPrim()) {
                 return true;
             }
-        }
+        }else tkerr("no expression after or operator");
     }
     return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
 }
@@ -187,7 +187,7 @@ bool exprAndPrim() {
             if (exprAndPrim()) {
                 return true;
             }
-        }tkerr("No expression after &&");
+        }tkerr("No expression after and operator");
     }
     return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
 }
@@ -303,7 +303,7 @@ bool exprMulPrim() {
             if (exprMulPrim()) {
                 return true;
             }
-        }tkerr("No expression after multiplier operator");
+        }else tkerr("No expression after multiplier operator");
     }
     return true; // ε - exprOrPrim returnează true chiar dacă nu consumă nimic
 }
@@ -318,7 +318,7 @@ bool exprCast(){
 				if(exprCast()){
 					return true;
 				}
-			}
+			}else tkerr(") missing");
 		}
 	}
 	if(exprUnary()){
@@ -336,7 +336,7 @@ bool exprUnary(){
 	if(consume(SUB)|| consume(ADD)){
 		if(exprUnary()){
 			return true;
-		}
+		}else tkerr("no expression after adder operator");
 	}
 	if(exprPostfix()){
 		printf("exprPostfix->exprUnary\n");
@@ -386,7 +386,7 @@ bool exprPostfixPrim(){
 			if(exprPostfixPrim()){
 				return true;
 			}
-		}
+		}else tkerr("missing ID after .");
 		iTk=start;
 	}
 	return true;
@@ -407,14 +407,13 @@ bool exprPrimary(){
 			if(expr()){
 				printf("expr->exprPrimary");
 				while(consume(COMMA)){
-					if(!expr()){
-						return false;
-					}
+					if(expr()){}
+					else tkerr("Missing expression after .");
 				}
-			}
-			if(!consume(RPAR)){
-				return false;
-			}
+			}else tkerr("Missing expression after (");
+			if(consume(RPAR)){
+				return true;
+			}else tkerr("Missing )");
 		}
 		return true;
 	}
@@ -434,9 +433,8 @@ bool exprPrimary(){
 		if(expr()){
 			if(consume(RPAR)){
 				return true;
-			}
-		}
-		iTk = start;
+			}else tkerr("Missing )");
+		}else tkerr("Missing expression after (");
 	}
 	printf("exprPrimaryfalse\n");
 	iTk = start;
@@ -471,10 +469,10 @@ bool stm(){
 				if(consume(RPAR)){
 					if(stm()){
 						return true;
-					}
-				}
-			}
-		}
+					}else tkerr("Missing while body");
+				}else tkerr("Missing ) for while");
+			}else tkerr("Missing while condition");
+		}else tkerr("Missing ) after while keyword");
 		iTk=start;
 	}
 	else if(consume(RETURN)){
@@ -535,9 +533,6 @@ bool fnDef(){
 		if(consume(ID)){
 			if(consume(LPAR)){
 				if(fnParam()){
-					// while(consume(COMMA) && fnParam()){
-					// 	printf("fnParam->fnDef\n");
-					// }
 					while(consume(COMMA)){
 						if(fnParam()){}
 						else tkerr("Expected type specifier in function after ,");
@@ -549,7 +544,7 @@ bool fnDef(){
 						return true;
 					}else tkerr("Missing body function");
 				}else tkerr("Missing ) in function");
-			}else tkerr("Missing arguments of function");
+			}
 		}
 	}
 
