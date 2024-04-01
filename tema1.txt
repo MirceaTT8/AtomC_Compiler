@@ -1,0 +1,3 @@
+Sa se implementezi in lexer.c:
+- functia de extract() cu intervalul [)
+- introdus mai multe cuvinte cheie in tokenize, si in ramura de default pentru alte cazuri
