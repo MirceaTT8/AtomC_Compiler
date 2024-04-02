@@ -48,7 +48,7 @@ bool typeBase(){
 	else if(consume(STRUCT)){
 		if(consume(ID)){
 			return true;
-			}else tkerr("Lipseste id-ul struct-ului");
+			}else tkerr("Id of struct missing");
 		}
 	iTk=start; // refacere pozitie initiala
 	return false;
@@ -78,7 +78,7 @@ bool varDef(){
 			if(consume(SEMICOLON)){
 				return true;
 			}else tkerr("; missing when declaring variable");
-		}else tkerr("id missing after a tyopBase statement");
+		}else tkerr("id missing when declaring variable");
 	}
 	iTk = start;
 	return false;
@@ -336,7 +336,7 @@ bool exprUnary(){
 	if(consume(SUB)|| consume(NOT)){
 		if(exprUnary()){
 			return true;
-		}else tkerr("no expression after adder operator");
+		}else tkerr("no expression after unary operator");
 	}
 	if(exprPostfix()){
 		printf("exprPostfix->exprUnary\n");
@@ -408,7 +408,7 @@ bool exprPrimary(){
 				printf("expr->exprPrimary");
 				while(consume(COMMA)){
 					if(expr()){}
-					else tkerr("Missing expression after .");
+					else tkerr("Missing expression after ,");
 				}
 			}else tkerr("Missing expression after (");
 			if(consume(RPAR)){
@@ -519,7 +519,7 @@ bool fnParam(){
 		if(consume(ID)){
 			if(arrayDecl()){}
 			return true;
-		}else tkerr("Missing id after typebase");
+		}else tkerr("Missing id for typebase in function parameters");
 	}
 	iTk=start;
 	return false;
@@ -545,7 +545,7 @@ bool fnDef(){
 					}else tkerr("Missing body function");
 				}else tkerr("Missing ) in function");
 			}
-		}
+		}else tkerr("Missing id for function");
 	}
 
 	iTk=start;
@@ -568,7 +568,7 @@ bool structDef(){
 					}else tkerr("; expected at struct defining");
 				}else tkerr("Missing } when defining struct");
 			}
-		}else tkerr("Lipseste id-ul struct-ului");
+		}else tkerr("Id of the struct missing");
 	}
 	iTk = start;
 	return false;
