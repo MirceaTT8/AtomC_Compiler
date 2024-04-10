@@ -5,8 +5,7 @@
 
 void parse(Token *tokens);
 bool stm(); // Prototipul funcției stm
-bool stmCompound(); // Prototipul funcției stmCompound
-
+bool stmCompound(bool newDomain); // Prototipul funcției stmCompound
 bool expr();
 bool exprAssign();
 bool exprOr();
