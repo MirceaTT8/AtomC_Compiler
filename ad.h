@@ -4,8 +4,7 @@
 
 // the domain analysis
 
-struct Symbol;
-typedef struct Symbol Symbol;
+struct Symbol;typedef struct Symbol Symbol;
 
 typedef enum{		// base type
 	TB_INT,TB_DOUBLE,TB_CHAR,TB_VOID,TB_STRUCT
@@ -26,7 +25,7 @@ typedef struct{		// the type of a symbol
 int typeSize(Type *t);
 
 typedef enum{		// symbol's kind
-	SK_VAR,SK_PARAM,SK_FN,SK_STRUCT //felurile
+	SK_VAR,SK_PARAM,SK_FN,SK_STRUCT
 	}SymKind;
 
 struct Symbol{
@@ -38,7 +37,7 @@ struct Symbol{
 	//		- NULL for global symbols
 	//		- a struct for variables defined in that struct
 	//		- a function for parameters/variables local to that function
-	Symbol *owner; // scope-ul variabilei, 0 pt variabilele globale, altu daca e intr-o functie,
+	Symbol *owner;
 	Symbol *next;		// the link to the next symbol in list
 	union{		// specific data fo each kind of symbol
 		// the index in fn.locals for local vars
@@ -50,10 +49,9 @@ struct Symbol{
 		int paramIdx;
 		// the members of a struct
 		Symbol *structMembers;
-		struct{ //pentru functii
+		struct{
 			Symbol *params;		// the parameters of a function
 			Symbol *locals;		// all local vars of a function, including the ones from its inner domains
-			//aceste urm 2 sunt pentru vm
 			void(*extFnPtr)();		// !=NULL for extern functions
 			Instr *instr;		// used if extFnPtr==NULL
 			}fn;
@@ -72,13 +70,13 @@ int symbolsLen(Symbol *list);
 // frees the memory of a symbol
 void freeSymbol(Symbol *s);
 
-typedef struct _Domain{ //toate simbolurile din domeniul global, local al unei functii etc
+typedef struct _Domain{
 	struct _Domain *parent;		// the parent domain
 	Symbol *symbols;		// the symbols from this domain (single linked list)
 	}Domain;
 
 // the current domain (the top of the domains's stack)
-extern Domain *symTable; // stiva de domenii
+extern Domain *symTable;
 
 // adds a domain to the top of the domains's stack
 Domain *pushDomain();

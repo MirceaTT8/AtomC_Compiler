@@ -8,7 +8,7 @@ These tokens include keywords, identifiers, numbers, and operator characters.
 There can be multiple forms that have the same content (e.g., nearly every programming language has a while statement, but with different syntax).
 Semantic analysis includes:
   -   **Domain Analyzer** – this part evaluates the program’s declarations, such as variables and functions.
-  -   **Type Analyzer** – this part evaluates how constants and symbols are utilized in the program.
+  -   **(TO BE ADDED)** **Type Analyzer** – this part evaluates how constants and symbols are utilized in the program.
 
 * **(TO BE ADDED)** **Virtual Machine**: This is not a part of the compiler itself but is an environment where the compiled code can be executed.
 It acts as an intermediary layer between the compiled code and the physical hardware, enabling the compiled code to run on multiple platforms without modification.

@@ -16,11 +16,17 @@ int main(){
     free(inbuf);
     
     pushDomain();
+    vmInit(); 
     
     parse(tokens);
     
     
     showDomain(symTable, "global");
+    
+    
+    Instr *testCode=genTestProgram(); // genereaza cod de test pentru masina virtuala
+    run(testCode); // executie cod masina virtuala
+    
     dropDomain();
     free(tokens);
 
